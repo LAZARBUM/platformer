@@ -196,8 +196,66 @@ public class Level {
 	//#############################################################################################################
 	//Your code goes here! 
 	//Please make sure you read the rubric/directions carefully and implement the solution recursively!
+	// Adds water recursively based on fullness level and rules.
+	// Precondition: called when flower spawns water or when water flows
+	// Postcondition: water spreads and updates map correctly.
 	private void water(int col, int row, Map map, int fullness) {
-		
+		//check bounds
+		if (col < 0 || col>= map.getTiles().length || row < 0 || row >= map.getTiles()[0].length) {
+			return;
+		}
+
+		Tile currentTile = map.getTiles()[col][row];
+
+		//stop if tile is solid or already water
+		if (currentTile.isSolid() || currentTile instanceof Water) {
+			return;
+		}
+
+		//decide water type based on fullness
+		String imageName = "";
+		if (fullness == 0) {
+			imageName = "Falling_water";
+		} else if (fullness == 1) {
+			imageName = "Quarter_water";
+		} else if (fullness == 2) {
+			imageName = "Half_water";
+		} else {
+			imageName = "Full_water";
+		}
+
+		//make nd add water tile
+		Water w = new Water(col, row, tileSize, tileset.getImage(imageName), this, fullness);
+		map.addTile(col, row, w);
+
+		//try to flow down
+		if (row + 1 < map.getTiles()[0].length) {
+			Tile below = map.getTiles()[col][row + 1];
+			if (!below.isSolid()) {
+				// Flow down as falling water
+				water(col, row + 1, map, 0);
+				return; // Don't go sideways if falling
+			}
+		}
+
+		// flow left and rght if there's stil waer left
+		if (fullness > 0) {
+			// flowright
+			if (col + 1 < map.getTiles().length) {
+				Tile right = map.getTiles()[col + 1][row];
+				if (!right.isSolid() && !(right instanceof Water)) {
+					water(col + 1, row, map, fullness - 1);
+				}
+			}
+
+			// Flow left
+			if (col - 1 >= 0) {
+				Tile left = map.getTiles()[col - 1][row];
+				if (!left.isSolid() && !(left instanceof Water)) {
+					water(col - 1, row, map, fullness - 1);
+				}
+			}
+		}
 	}
 
 
